@@ -6,7 +6,7 @@ class UI:
         pygame.display.set_caption("Tic-Tac-Toe")
         
         # Initialise pygame window, surface to draw on, and game font
-        self.ttt = pygame.display.set_mode((225, 225))
+        self.ttt = pygame.display.set_mode((225, 250))
         self.surface = pygame.Surface(self.ttt.get_size())
         self.surface = self.surface.convert()
         self.font = pygame.font.Font(None, 18)
@@ -51,6 +51,28 @@ class UI:
         row = int(mouseY / 225 * 3)
         col = int(mouseX / 225 * 3)
 
-        print("Row, Column:", row, col)
+        # Check if the mouse position is within the bounds
+        # Only render Xs and Os if the cursor is on the game board
+        if self.checkWithinBound(mouseX, mouseY):
+            # print("Within bound")
+            self.drawMove(row, col, 'X')
+        else:
+            # print("Not")
+            pass
+
+    def drawMove(self, row, col, char):
+        # Get coordinates of the centre of the grid space
+        centreX = ((col) * 75) + 32
+        centreY = ((row) * 75) + 32
+        text = self.font.render(char, 1, (10, 10, 10))
+        self.surface.blit(text, (centreX, centreY))
+
+    def showStatus(self, statusMessage):
+        pass
+
+    def checkWithinBound(self, posX, posY):
+        if (posX < 0 or posX > 225 or posY < 0 or posY > 225):
+            return False
+        return True
 
 UI()
