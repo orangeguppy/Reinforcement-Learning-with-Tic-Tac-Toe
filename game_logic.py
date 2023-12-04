@@ -36,13 +36,7 @@ class Game_Logic:
             return True
         return False
 
-    def evaluate_board(self):
-        if (self.check_winner('X')):
-            self.done = True
-        elif (self.check_winner('O')):
-            self.done = True
-
-    def check_winner(self):
+    def update_winner(self):
         # Boolean for evaluating the win condition
         if (self.check_for_win_condition('X')):
             self.winner = self.playerX
@@ -58,31 +52,6 @@ class Game_Logic:
             return True
         return False
 
-    def play_game(self):
-        self.print_board()
-        possible_moves = self.possible_moves()
-        while (len(self.possible_moves()) > 0 and self.winner is None):
-            if (self.playerX_turn):
-                row, col = playerX.move(self.possible_moves())
-                self.plot_char('X', row, col)
-                self.playerX_turn = False
-            else:
-                row, col = playerO.move(self.possible_moves())
-                self.plot_char('O', row, col)
-                self.playerX_turn = True
-
-            # Update the winner if any and print the board
-            self.print_board()
-            self.check_winner()
-        
-        # There are no more moves and the game has ended
-        self.check_winner()
-        if (self.winner == None):
-            print("Draw!")
-        else:
-            print("Winner is", self.winner)
-        return
-
     def end_game(self):
         print(self.winner)
 
@@ -96,8 +65,9 @@ class Game_Logic:
             self.done = True
         return moves
 
-playerX = players.RandomPlayer()
-playerO = players.RandomPlayer()
-
-game_logic = Game_Logic(playerX, playerO)
-game_logic.play_game()
+    def get_winner_status_msg(self):
+        if (self.winner is None):
+            return "Draw"
+        else:
+            winner_str = str(self.winner) + " won the game!"
+            return winner_str

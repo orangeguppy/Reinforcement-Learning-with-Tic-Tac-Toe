@@ -19,18 +19,17 @@ class UI:
         self.render()
 
     def render(self):
-        while self.running:
-            # Update the main display with the contents of self.surface
-            self.ttt.blit(self.surface, (0, 0))
-            pygame.display.flip()
+        # Update the main display with the contents of self.surface
+        self.ttt.blit(self.surface, (0, 0))
+        pygame.display.flip()
 
-            # Update the mouseclick position
-            self.mouseClick()
+        # Update the mouseclick position
+        # self.mouseClick()
 
-            # Stop rendering the UI if the game is exited
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
+        # Stop rendering the UI if the game is exited
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
 
     def draw_lines(self):
         self.surface.fill((250, 250, 250))
@@ -55,12 +54,10 @@ class UI:
         # Only render Xs and Os if the cursor is on the game board
         if self.checkWithinBound(mouseX, mouseY):
             # print("Within bound")
-            self.drawMove(row, col, 'X')
-        else:
-            # print("Not")
-            pass
+            self.drawMove('X', row, col)
+        self.render()
 
-    def drawMove(self, row, col, char):
+    def drawMove(self, char, row, col):
         # Get coordinates of the centre of the grid space
         centreX = ((col) * 75) + 32
         centreY = ((row) * 75) + 32
@@ -68,11 +65,23 @@ class UI:
         self.surface.blit(text, (centreX, centreY))
 
     def showStatus(self, statusMessage):
-        pass
+        # self.surface.fill((250, 250, 250), (0, 300, 300, 25))
+        # text = self.font.render(statusMessage, 1, (10, 10, 10))
+        # self.surface.blit(text, (10, 230))
+        # self.render()
+        text = self.font.render(statusMessage, 1, (10, 10, 10))
+        text_width, text_height = self.font.size(statusMessage)  # Get the width and height of the rendered text
+
+        # Fill the background rectangle with a light gray color
+        self.surface.fill((250, 250, 250), (10, 230, 214, 24))
+
+        # Blit the rendered text onto the surface
+        self.surface.blit(text, (10 + 10, 230 + 5))  # Position the text with some padding within the background rectangle
+
+        # Update the UI
+        self.render()
 
     def checkWithinBound(self, posX, posY):
         if (posX < 0 or posX > 225 or posY < 0 or posY > 225):
             return False
         return True
-
-UI()
