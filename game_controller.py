@@ -60,5 +60,3 @@ game_logic = Game_Logic(playerX, playerO)
 
 game_controller = Game_Controller(ui, game_logic)
 game_controller.play_game()
-
-
