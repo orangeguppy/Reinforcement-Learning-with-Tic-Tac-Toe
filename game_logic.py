@@ -60,12 +60,8 @@ class Game_Logic:
         print(self.winner)
 
     def possible_moves(self):
-        moves = []
-        for i in range(3):
-            for j in range(3):
-                if self.board[i][j] == ' ':
-                    moves.append((i, j))
-        if len(moves) == 0:
+        moves = [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == ' ']
+        if not moves:
             self.done = True
         return moves
 
@@ -75,3 +71,11 @@ class Game_Logic:
         else:
             winner_str = str(self.winner) + " won the game!"
             return winner_str
+
+    def reset_board(self):
+        self.board = (
+            (' ', ' ', ' '),
+            (' ', ' ', ' '),
+            (' ', ' ', ' ')
+        )
+        self.winner = None
