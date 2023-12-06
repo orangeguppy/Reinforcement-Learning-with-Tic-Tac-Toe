@@ -65,10 +65,6 @@ class UI:
         self.surface.blit(text, (centreX, centreY))
 
     def showStatus(self, statusMessage):
-        # self.surface.fill((250, 250, 250), (0, 300, 300, 25))
-        # text = self.font.render(statusMessage, 1, (10, 10, 10))
-        # self.surface.blit(text, (10, 230))
-        # self.render()
         text = self.font.render(statusMessage, 1, (10, 10, 10))
         text_width, text_height = self.font.size(statusMessage)  # Get the width and height of the rendered text
 

@@ -1,4 +1,5 @@
 import players
+import utils
 
 class Game_Logic:
     def __init__(self, playerX, playerO, training=False):
@@ -50,19 +51,10 @@ class Game_Logic:
 
     def update_winner(self):
         # Boolean for evaluating the win condition
-        if self.check_for_win_condition('X'):
+        if utils.check_for_win_condition(self.board, 'X'):
             self.winner = self.playerX
-        elif self.check_for_win_condition('O'):
+        elif utils.check_for_win_condition(self.board, 'O'):
             self.winner = self.playerO
-
-    def check_for_win_condition(self, player):
-        # Check rows, columns, and diagonals for a winning combination
-        for i in range(3):
-            if all(self.board[i][j] == player for j in range(3)) or all(self.board[j][i] == player for j in range(3)):
-                return True
-        if all(self.board[i][i] == player for i in range(3)) or all(self.board[i][2 - i] == player for i in range(3)):
-            return True
-        return False
 
     def end_game(self):
         print(self.winner)

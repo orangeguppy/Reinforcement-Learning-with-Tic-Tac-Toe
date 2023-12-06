@@ -2,6 +2,7 @@ import players
 from game_logic import Game_Logic
 import ui
 import time
+import utils
 
 class Game_Controller:
     def __init__(self, ui, game_logic):
@@ -18,13 +19,20 @@ class Game_Controller:
 
         # Continue alternating between players until there are no moves left or someone has won
         while (len(self.game_logic.possible_moves()) > 0 and self.game_logic.winner is None):
+            # Current board state
+            s_old = self.game_logic.board
             if (self.game_logic.playerX_turn):
-                row, col = self.game_logic.playerX.move(self.game_logic.possible_moves())
+                # Pick an action
+                row, col = self.game_logic.playerX.move(self.game_logic.possible_moves(), self.game_logic.board)
                 self.plot_char('X', row, col)
+                # s_new = self.game_logic.board # New board state
+                # self.playerX.calculate_Q_new(s_old, s_new, (row, col, 'X')) # Update the Q_table
                 self.game_logic.playerX_turn = False
             else:
-                row, col = self.game_logic.playerO.move(self.game_logic.possible_moves())
+                row, col = self.game_logic.playerO.move(self.game_logic.possible_moves(), self.game_logic.board)
                 self.plot_char('O', row, col)
+                # s_new = self.game_logic.board # New board state
+                # self.game_logic.playerO.calculate_Q_new(s_old, s_new, (row, col, 'O')) # Update the Q_table
                 self.game_logic.playerX_turn = True
 
             # Update the winner if any and print the board
