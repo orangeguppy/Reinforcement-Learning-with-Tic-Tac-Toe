@@ -96,8 +96,8 @@ playerO = players.QLearner()
 game_logic = Game_Logic(playerX, playerO)
 
 game_controller = Game_Controller(game_logic, None)
-game_controller.train(20)
-for key, value in players.QLearner.Q_table.items():
-    if value != 0:
+game_controller.train(300)
+for key, value in playerX.Q_table.items():
+    if value > 1:
         print(key)
         print(value)
