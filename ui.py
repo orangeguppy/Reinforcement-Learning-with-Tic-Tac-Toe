@@ -23,14 +23,6 @@ class UI:
         self.ttt.blit(self.surface, (0, 0))
         pygame.display.flip()
 
-        # Update the mouseclick position
-        # self.mouseClick()
-
-        # Stop rendering the UI if the game is exited
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-
     def draw_lines(self):
         self.surface.fill((250, 250, 250))
         # Horizontal lines
@@ -41,7 +33,7 @@ class UI:
         pygame.draw.line(self.surface, (0, 0, 0), (0,75), (225, 75), 2)
         pygame.draw.line(self.surface, (0, 0, 0), (0,150), (225, 150), 2)
 
-    def mouseClick(self):
+    def mouseClick(self, char):
         event = pygame.event.wait()
         while event.type != pygame.MOUSEBUTTONDOWN:
             event = pygame.event.wait()
@@ -54,8 +46,9 @@ class UI:
         # Only render Xs and Os if the cursor is on the game board
         if self.checkWithinBound(mouseX, mouseY):
             # print("Within bound")
-            self.drawMove('X', row, col)
+            self.drawMove(char, row, col)
         self.render()
+        return (row, col, char)
 
     def drawMove(self, char, row, col):
         # Get coordinates of the centre of the grid space

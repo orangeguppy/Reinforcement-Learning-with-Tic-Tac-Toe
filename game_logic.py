@@ -26,7 +26,7 @@ class Game_Logic:
         print("Player O is", self.playerO)
 
         # Initialise turn
-        self.playerX_turn = False
+        self.playerX_turn = True
 
     def print_board(self):
         for row in self.board:

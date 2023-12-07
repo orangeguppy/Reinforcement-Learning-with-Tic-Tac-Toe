@@ -14,8 +14,6 @@ class Game_Controller:
     def play_game(self):
         if (self.ui is not None):
             self.ui.showStatus("Game has started")
-        # Print the status of the board
-        # self.game_logic.print_board()
 
         # Initialise all possible moves
         possible_moves = self.game_logic.possible_moves()
@@ -53,11 +51,11 @@ class Game_Controller:
         # self.game_logic.print_board()
         self.game_logic.update_winner()
         if (self.game_logic.winner == None):
-            print("Draw!")
+            # print("Draw!")
             if (self.ui is not None):
                 self.ui.showStatus("Draw!")
         else:
-            print("Winner is", self.game_logic.winner)
+            # print("Winner is", self.game_logic.winner)
             if (self.ui is not None):
                 self.ui.showStatus(self.game_logic.get_winner_status_msg())
         # time.sleep(1)
@@ -77,8 +75,8 @@ class Game_Controller:
             self.play_game()
             counter += 1
             self.game_logic.reset_board()
+            print(counter)
         logging.info("Final table")
-        # logging.info(players.QLearner.Q_table)
 
 # playerX = players.RandomPlayer()
 # playerO = players.RandomPlayer()
@@ -96,8 +94,25 @@ playerO = players.QLearner()
 game_logic = Game_Logic(playerX, playerO)
 
 game_controller = Game_Controller(game_logic, None)
-game_controller.train(300)
+game_controller.train(20000)
+
+# Save the Q tables
+playerX.saveQtable("playerXstates")
+playerO.saveQtable("playerOstates")
+
 for key, value in playerX.Q_table.items():
     if value > 1:
         print(key)
         print(value)
+
+
+ # QLearner vs Human
+ui = ui.UI()
+playerX = players.QLearner()
+playerX.loadQtable("playerXstates")
+logging.basicConfig(filename='output.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.info(playerX.Q_table)
+playerO = players.HumanPlayer(ui)
+game_logic = Game_Logic(playerX, playerO)
+game_controller = Game_Controller(game_logic, ui)
+game_controller.play_game()

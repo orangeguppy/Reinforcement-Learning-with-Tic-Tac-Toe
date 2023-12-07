@@ -2,10 +2,14 @@ import random
 import itertools
 import utils
 import logging
+import pickle
 
 class HumanPlayer:
-    def move(self):
-        pass
+    def __init__(self, ui):
+        self.ui = ui
+
+    def move(self, possible_moves, state, char):
+        return self.ui.mouseClick(char)
 
 class RandomPlayer:
     def __init__(self):
@@ -40,11 +44,12 @@ class QLearner:
     '''
 
     '''Step 2'''
-    def __init__(self, epsilon=0.2, alpha=0.3, gamma=0.9):
+    def __init__(self, epsilon=0.2, alpha=0.3, gamma=0.98, training=False):
         '''Step 1'''
         self.epsilon = epsilon
         self.alpha = alpha
         self.gamma = gamma
+        self.training = training
 
         '''Step 2: Lazy-Loading the Q Table. I initially initialised all possible state-action combinations but it was really slow.'''
         self.Q_table = {}
@@ -57,6 +62,10 @@ class QLearner:
     '''
     @profile
     def move(self, possible_moves, state, char):
+        if (self.training is False):
+            most_optimal_action = self.get_most_optimal_action(state, char)
+            return most_optimal_action
+
         # First choose between exploration and exploitation
         if (random.random() < self.epsilon): # Exploration
             (row, col) = random.choice(possible_moves)
@@ -71,7 +80,7 @@ class QLearner:
 
     def get_most_optimal_action(self, state, char):
         Q_list = []
-        valid_actions = utils.generate_possible_actions_per_state(state)
+        valid_actions = utils.generate_possible_actions_per_state(state, char)
         for action in valid_actions:
             Q_list.append(self.getQ(state, action))
 
@@ -95,40 +104,6 @@ class QLearner:
             self.Q_table[(state, action)] = 1.0
         return self.Q_table.get((state, action))
 
-    # @profile
-    # def get_most_optimal_action(self, state):
-    #     valid_actions = utils.generate_possible_actions_per_state(state)
-
-    #     valid_pairs = [(key, QLearner.Q_table[key]) for key in QLearner.Q_table.keys() if key[0] == state and key[1] in valid_actions]
-
-    #     if not valid_pairs:
-    #         return None
-
-    #     max_reward = float('-inf')
-    #     maximising_actions = []
-
-    #     for key, q_value in valid_pairs:
-    #         if q_value > max_reward:
-    #             max_reward = q_value
-    #             maximising_actions = [key]
-    #         elif q_value == max_reward:
-    #             maximising_actions.append(key)
-
-    #     if len(maximising_actions) == 1:
-    #         return maximising_actions[0]
-    #     else:
-    #         return random.choice(maximising_actions)[1]
-    
-    def updateQ(self, reward, new_state, possible_moves): # update Q states using Qleanning
-        q_list=[]
-        for moves in possible_moves:
-            q_list.append(self.getQ(tuple(new_state), moves))
-        if q_list:
-            max_q_next = max(q_list)
-        else:
-            max_q_next=0.0
-        self.Q[self.state_action_last] = self.q_last + self.alpha * ((reward + self.gamma*max_q_next) - self.q_last)
-
     '''Q(S, A) = Q(S, A) + alpha * (R + gamma * maxaQ(S', a) - Q(S, A))'''
     @profile
     def calculate_Q_new(self, s_old, s_new, action):
@@ -144,13 +119,27 @@ class QLearner:
             reward = self.calculate_reward(s_new, action[2]) # Pass in the current state of the board and the character being plotted
             self.Q_table[(s_old, action)] = Q_old_reward + self.alpha * (reward + self.gamma * (q_s_prime_a) - Q_old_reward)
 
-    @profile
     def calculate_reward(self, s_new, char):
         if (utils.check_for_win_condition(s_new, char)):
             return 1
         elif (utils.check_for_win_condition(s_new, utils.get_opposing_char(char))):
             return -1
-        else:
+        elif (self.check_board_complete(s_new) is False):
             return 0
+        else:
+            return 0.5
 
-q = QLearner()
+    def check_board_complete(self, board):
+        for row in board:
+            for char in row:
+                if char == ' ':
+                    return False
+        return True
+
+    def saveQtable(self, file_name):  #save table
+        with open(file_name, 'wb') as handle:
+            pickle.dump(self.Q_table, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def loadQtable(self, file_name): # load table
+        with open(file_name, 'rb') as handle:
+            self.Q_table = pickle.load(handle)

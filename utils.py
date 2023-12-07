@@ -19,12 +19,12 @@ def generate_all_state_action_pairs(state):
     return state_action_pairs
 
 '''For a specific permutation (state S) of the Tic-Tac-Toe board, generate all available actions'''
-def generate_possible_actions_per_state(state):
+def generate_possible_actions_per_state(state, char):
     moves = []
     for i, row in enumerate(state):
         for j, cell in enumerate(row):
             if cell == ' ':
-                moves.extend([(i, j, 'X'), (i, j, 'O')])
+                moves.extend([(i, j, char)])
     return moves
 
 '''Check if a win condition has been fulfilled for any player'''
