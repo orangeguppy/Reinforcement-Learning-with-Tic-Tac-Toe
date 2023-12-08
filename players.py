@@ -60,7 +60,6 @@ class QLearner:
     Step 3: Greedy-Epsilon strategy to pick an action
     This method is called by the Game Logic class when its the AI's turn to move
     '''
-    @profile
     def move(self, possible_moves, state, char):
         if (self.training is False):
             most_optimal_action = self.get_most_optimal_action(state, char)
@@ -105,7 +104,6 @@ class QLearner:
         return self.Q_table.get((state, action))
 
     '''Q(S, A) = Q(S, A) + alpha * (R + gamma * maxaQ(S', a) - Q(S, A))'''
-    @profile
     def calculate_Q_new(self, s_old, s_new, action):
         # Old reward
         Q_old_reward = self.Q_table[(s_old, action)]
