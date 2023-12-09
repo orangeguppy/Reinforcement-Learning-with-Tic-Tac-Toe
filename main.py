@@ -43,6 +43,8 @@ def play_against_ai():
     game_logic = Game_Logic(playerX, playerO)
     game_controller = Game_Controller(game_logic, ui)
     game_controller.play_game()
+    print(game_controller.game_logic.board)
 
 # train(20000)
-play_against_ai()
+while(True):
+    play_against_ai()

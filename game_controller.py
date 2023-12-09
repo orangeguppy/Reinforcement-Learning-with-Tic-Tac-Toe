@@ -48,6 +48,10 @@ class Game_Controller:
 
         # There are no more moves and the game has ended
         # self.game_logic.print_board()
+
+        if (isinstance(self.game_logic.playerO, players.QLearner)):
+            self.game_logic.playerX.calculate_Q_new(s_old, s_new, (row, col, 'X')) # Update the Q_table
+            self.game_logic.playerO.calculate_Q_new(s_old, s_new, (row, col, 'O')) # Update the Q_table
         self.game_logic.update_winner()
         if (self.game_logic.winner == None):
             print("Draw!")
