@@ -25,6 +25,8 @@ class Game_Controller:
                 
                 # Pick an action
                 (row, col, char) = self.game_logic.playerX.move(self.game_logic.possible_moves(), self.game_logic.board, 'X')
+
+                # Execute the action
                 self.plot_char('X', row, col)
             else:
                 # Current board state
@@ -32,35 +34,36 @@ class Game_Controller:
                 
                 # Pick an action
                 (row, col, char) = self.game_logic.playerO.move(self.game_logic.possible_moves(), self.game_logic.board, 'O')
+
+                # Execute the action
                 self.plot_char('O', row, col)
                 
 
             # Update the winner if any and print the board
-            # self.game_logic.print_board()
             self.game_logic.update_winner()
             if (self.ui is not None):
                 self.ui.render()
-            # time.sleep(2)
 
             # Update the Q Rewards after each turn
             if (isinstance(self.game_logic.playerX, players.QLearner) and isinstance(self.game_logic.playerO, players.QLearner)):
                 s_new = self.game_logic.board # New board state
 
+                # Possible moves for each player
+                playerX_possible_moves = utils.generate_possible_actions_per_state(s_new, 'X')
+                playerO_possible_moves = utils.generate_possible_actions_per_state(s_new, 'O')
+
                 # Reward from Player X's POV
                 reward = self.game_logic.playerX.calculate_reward(s_new, 'X')
 
-                # If the game has been won, update the Q table for both players
-                if (abs(reward) == 1):
-                    self.game_logic.playerX.calculate_Q_new(s_new, 'X')
-                    self.game_logic.playerO.calculate_Q_new(s_new, 'O')
-                elif (reward == 0 and self.game_logic.playerX_turn):
-                    self.game_logic.playerO.calculate_Q_new(s_new, 'O')
-                elif (reward == 0 and not self.game_logic.playerX_turn):
-                    self.game_logic.playerX.calculate_Q_new(s_new, 'X')
-                elif (reward == 0.5):
-                    self.game_logic.playerX.calculate_Q_new(s_new, 'X')
-                    self.game_logic.playerO.calculate_Q_new(s_new, 'O')
-            
+                # Calculate the new Q table
+                if (abs(reward) == 1 or abs(reward) == 0.5): # Game has ended
+                    self.game_logic.playerX.calculate_Q_new(reward, s_new, playerX_possible_moves)
+                    self.game_logic.playerO.calculate_Q_new(-1 * reward, s_new, playerO_possible_moves)
+                elif (reward == 0 and self.game_logic.playerX_turn): # Game is ongoing
+                    self.game_logic.playerO.calculate_Q_new(-1 * reward, s_new, playerO_possible_moves)
+                elif (reward == 0 and not self.game_logic.playerX_turn): # Game is ongoing
+                    self.game_logic.playerX.calculate_Q_new(reward, s_new, playerX_possible_moves)
+
             # End the current player's turn
             self.game_logic.playerX_turn = not self.game_logic.playerX_turn
         

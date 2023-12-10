@@ -71,6 +71,7 @@ class QLearner:
             (row, col) = random.choice(possible_moves)
             # Save the latest state-action pair
             self.state_action_last = (state, (row, col, char))
+
             # Save the old Q_value estimate which will be updated at the next iteration
             self.Q_last = self.getQ(state, (row, col, char))
             return (row, col, char)
@@ -105,19 +106,28 @@ class QLearner:
         return self.Q_table.get((state, action))
 
     '''Q(S, A) = Q(S, A) + alpha * (R + gamma * maxaQ(S', a) - Q(S, A))'''
-    def calculate_Q_new(self, s_new, char):
-        # Get the most optimal action for the new state
-        action_maximising_new_state = self.get_most_optimal_action(s_new, char)
-
-        # Q(S', A)
-        if (action_maximising_new_state is not None):
-            q_s_prime_a = self.getQ(s_new, action_maximising_new_state)
+    def calculate_Q_new(self, reward, state, possible_moves): # update Q states using Qleanning
+        q_list = []
+        for moves in possible_moves:
+            q_list.append(self.getQ(state, moves))
+        if q_list:
+            max_q_next = max(q_list)
         else:
-            q_s_prime_a = 0
+            max_q_next=0.0
+        self.Q_table[self.state_action_last] = self.Q_last + self.alpha * ((reward + self.gamma*max_q_next) - self.Q_last)
+    # def calculate_Q_new(self, s_new, char):
+    #     # Get the most optimal action for the new state
+    #     action_maximising_new_state = self.get_most_optimal_action(s_new, char)
 
-        # Get reward of the new state
-        reward = self.calculate_reward(s_new, char) # Pass in the current state of the board and the character being plotted
-        self.Q_table[self.state_action_last] = self.getQ(self.state_action_last[0], self.state_action_last[1]) + self.alpha * (reward + self.gamma * (q_s_prime_a) - self.getQ(self.state_action_last[0], self.state_action_last[1]))
+    #     # Q(S', A)
+    #     if (action_maximising_new_state is not None):
+    #         q_s_prime_a = self.getQ(s_new, action_maximising_new_state)
+    #     else:
+    #         q_s_prime_a = 0
+
+    #     # Get reward of the new state
+    #     reward = self.calculate_reward(s_new, char) # Pass in the current state of the board and the character being plotted
+    #     self.Q_table[self.state_action_last] = self.Q_last + self.alpha * ((reward + self.gamma * (q_s_prime_a)) - self.Q_last)
 
     def calculate_reward(self, s_new, char):
         if (utils.check_for_win_condition(s_new, char)):

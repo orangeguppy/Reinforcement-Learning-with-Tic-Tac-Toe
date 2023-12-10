@@ -1,5 +1,6 @@
 import players
 import utils
+import random
 
 class Game_Logic:
     def __init__(self, playerX, playerO, training=False):
@@ -21,25 +22,13 @@ class Game_Logic:
         self.playerX = playerX
         self.playerO = playerO
 
-        # Print assignments
-        print("Player X is", self.playerX)
-        print("Player O is", self.playerO)
-
         # Initialise turn
-        self.playerX_turn = True
+        self.playerX_turn = random.choice([True, False])
 
     def print_board(self):
         for row in self.board:
             print(row)
         print()
-
-    '''Encode the state of the board for Q-Learning'''
-    def encode_board(self):
-        return self.board  # Returning the board as a tuple of tuples
-
-    '''Encode the action of plotting a character at a specific position for Q-Learning'''
-    def encode_action(self, char, row, col):
-        return (char, row, col)
 
     def plot_char(self, char, row, col):
         board_list = list(list(row_tuple) for row_tuple in self.board)
