@@ -1,15 +1,6 @@
 '''Utility functions for the game board'''
 import itertools
 
-'''Generate all permutations of the Tic-Tac-Toe board, each permutation is a state S in Q(S, A)'''
-def generate_possible_states():
-    possible_symbols = ['X', 'O', ' ']
-    all_possible_states = []
-    for symbol_permutation in itertools.product(possible_symbols, repeat=9):
-        temp_board = tuple(tuple(symbol_permutation[i * 3:(i + 1) * 3]) for i in range(3))
-        all_possible_states.append(temp_board)
-    return all_possible_states
-
 '''Encode each state S and set of corresponding actions A in the form Q(S, A)'''
 def generate_all_state_action_pairs(state):
     actions = generate_possible_actions_per_state(state)
