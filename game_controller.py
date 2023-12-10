@@ -1,15 +1,35 @@
-import players
-from game_logic import Game_Logic
-import ui
+'''
+Module: Game Controller
+
+This module defines the `Game_Controller` class, which orchestrates the gameplay logic, manages player moves,
+and facilitates the interaction between the game logic, player strategies, and user interface (if provided).
+
+The `Game_Controller` class controls the sequence of gameplay, training of Q-Learners, and updates the game's status.
+It collaborates with the `Game_Logic` module for game-specific logic, player modules for strategies, and the `ui` module for the user interface.
+
+Classes:
+    - Game_Controller: Orchestrates the gameplay, training, and interaction between the game logic and UI.
+
+Usage:
+    This module can be used as part of a larger application implementing a game, providing a structured interface to control gameplay, training,
+    and interfacing with the user interface.
+'''
+
 import time
-import utils
 import logging
 
+from game_logic import Game_Logic
+import players
+import ui
+import utils
+
 class Game_Controller:
+    '''This method initialises the Game_Controller Object'''
     def __init__(self, game_logic, ui=None):
         self.ui = ui
         self.game_logic = game_logic
 
+    '''This method controls the sequence of gameplay'''
     def play_game(self):
         if (self.ui is not None):
             self.ui.showStatus("Game has started")
@@ -19,7 +39,7 @@ class Game_Controller:
 
         # Continue alternating between players until there are no moves left or someone has won
         while (len(self.game_logic.possible_moves()) > 0 and self.game_logic.winner is None):
-            if (self.game_logic.playerX_turn):
+            if (self.game_logic.playerX_turn): # Player X's turn
                 # Current board state
                 self.game_logic.playerX.last_board = self.game_logic.board
                 
@@ -28,7 +48,7 @@ class Game_Controller:
 
                 # Execute the action
                 self.plot_char('X', row, col)
-            else:
+            else: # Player O's turn
                 # Current board state
                 self.game_logic.playerO.last_board = self.game_logic.board
                 
@@ -39,12 +59,12 @@ class Game_Controller:
                 self.plot_char('O', row, col)
                 
 
-            # Update the winner if any and print the board
+            # Update the winner if any and update the UI
             self.game_logic.update_winner()
             if (self.ui is not None):
                 self.ui.render()
 
-            # Update the Q Rewards after each turn
+            # Update the Q-Rewards after each turn
             if (isinstance(self.game_logic.playerX, players.QLearner) and isinstance(self.game_logic.playerO, players.QLearner)):
                 s_new = self.game_logic.board # New board state
 
@@ -68,17 +88,19 @@ class Game_Controller:
             self.game_logic.playerX_turn = not self.game_logic.playerX_turn
         
         self.game_logic.update_winner()
-        if (self.game_logic.winner == None):
-            print("Draw!")
-            if (self.ui is not None):
-                self.ui.showStatus("Draw!")
-        else:
-            print("Winner is", self.game_logic.winner)
-            if (self.ui is not None):
-                self.ui.showStatus(self.game_logic.get_winner_status_msg())
-        # time.sleep(1)
+        self.print_status()
         return
 
+    '''Train the Q-Learners for a specified number of epochs, where each epoch is a game'''
+    def train(self, num_epochs):
+        counter = 0
+        while counter < num_epochs:
+            self.play_game()
+            counter += 1
+            self.game_logic.reset_board()
+            print(counter)
+
+    '''Update the board, and UI if applicable, after each move'''
     def plot_char(self, char, row, col):
         # Record the move in the backend game logic
         self.game_logic.plot_char(char, row, col)
@@ -87,12 +109,13 @@ class Game_Controller:
         if (self.ui is not None):
             self.ui.drawMove(char, row, col)
 
-    def train(self, num_epochs):
-        print("Here")
-        counter = 0
-        while counter < num_epochs:
-            self.play_game()
-            counter += 1
-            self.game_logic.reset_board()
-            print(counter)
-        logging.info("Final table")
+    '''Print the game's result on the terminal, and on the UI if applicable'''
+    def print_status(self):
+        if (self.game_logic.winner == None):
+            print("Draw!")
+            if (self.ui is not None):
+                self.ui.showStatus("Draw!")
+        else:
+            print("Winner is", self.game_logic.winner)
+            if (self.ui is not None):
+                self.ui.showStatus(self.game_logic.get_winner_status_msg())
