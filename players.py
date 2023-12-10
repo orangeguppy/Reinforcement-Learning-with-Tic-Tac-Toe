@@ -1,9 +1,11 @@
 import random
 import itertools
-import utils
 import logging
 import pickle
 
+import utils
+
+'''This class represents a Human Player and allows the player to interact with a UI object'''
 class HumanPlayer:
     def __init__(self, ui):
         self.ui = ui
@@ -11,6 +13,7 @@ class HumanPlayer:
     def move(self, possible_moves, state, char):
         return self.ui.mouseClick(char)
 
+'''This class represents a Random Player with a random name'''
 class RandomPlayer:
     def __init__(self):
         self.name = random.choice(['Alice', 'Bob', 'Cat'])
@@ -21,6 +24,7 @@ class RandomPlayer:
     def __str__(self):
         return self.name
 
+'''This is the model-free Q-Learning agent'''
 class QLearner:
     '''
     OVERVIEW
@@ -39,11 +43,12 @@ class QLearner:
         Action: Picking the coordinates of the location to plot a character
         Reward:
             -1 -- Loss
-             0 -- Draw
+             0.5 -- Draw
              1 -- Win
+             0 -- Game has not ended yet
     '''
 
-    '''Step 2'''
+    '''Initialise Q-Learning parameters'''
     def __init__(self, epsilon=0.2, alpha=0.3, gamma=0.98, training=False):
         '''Step 1'''
         self.epsilon = epsilon
@@ -79,6 +84,18 @@ class QLearner:
             most_optimal_action = self.get_most_optimal_action(state, char)
             return most_optimal_action
 
+    '''Q(S, A) = Q(S, A) + alpha * (R + gamma * maxaQ(S', a) - Q(S, A))'''
+    def calculate_Q_new(self, reward, state, possible_moves): # update Q states using Qleanning
+        q_list = []
+        for moves in possible_moves:
+            q_list.append(self.getQ(state, moves))
+        if q_list:
+            max_q_next = max(q_list)
+        else:
+            max_q_next=0.0
+        self.Q_table[self.state_action_last] = self.Q_last + self.alpha * ((reward + self.gamma*max_q_next) - self.Q_last)
+
+    '''Get the best Q(S, A) for a given state S'''
     def get_most_optimal_action(self, state, char):
         Q_list = []
         valid_actions = utils.generate_possible_actions_per_state(state, char)
@@ -99,46 +116,25 @@ class QLearner:
         self.state_action_last = (state, valid_actions[i])
         self.Q_last = self.getQ(state, valid_actions[i])
         return valid_actions[i]
-
-    def getQ(self, state, action): # get Q states
-        if(self.Q_table.get((state, action))) is None:
-            self.Q_table[(state, action)] = 1.0
-        return self.Q_table.get((state, action))
-
-    '''Q(S, A) = Q(S, A) + alpha * (R + gamma * maxaQ(S', a) - Q(S, A))'''
-    def calculate_Q_new(self, reward, state, possible_moves): # update Q states using Qleanning
-        q_list = []
-        for moves in possible_moves:
-            q_list.append(self.getQ(state, moves))
-        if q_list:
-            max_q_next = max(q_list)
-        else:
-            max_q_next=0.0
-        self.Q_table[self.state_action_last] = self.Q_last + self.alpha * ((reward + self.gamma*max_q_next) - self.Q_last)
-    # def calculate_Q_new(self, s_new, char):
-    #     # Get the most optimal action for the new state
-    #     action_maximising_new_state = self.get_most_optimal_action(s_new, char)
-
-    #     # Q(S', A)
-    #     if (action_maximising_new_state is not None):
-    #         q_s_prime_a = self.getQ(s_new, action_maximising_new_state)
-    #     else:
-    #         q_s_prime_a = 0
-
-    #     # Get reward of the new state
-    #     reward = self.calculate_reward(s_new, char) # Pass in the current state of the board and the character being plotted
-    #     self.Q_table[self.state_action_last] = self.Q_last + self.alpha * ((reward + self.gamma * (q_s_prime_a)) - self.Q_last)
-
+    
+    '''Calculate the reward received by each player'''
     def calculate_reward(self, s_new, char):
         if (utils.check_for_win_condition(s_new, char)):
             return 1
-        elif (utils.check_for_win_condition(s_new, utils.get_opposing_char(char))):
+        elif (utils.check_for_win_condition(s_new, utils.get_opposing_char(char))): # If the enemy has won
             return -1
         elif (self.check_board_complete(s_new) is False):
             return 0
         else:
             return 0.5
 
+    '''Get Q(S, A) for a given state-action pair. If there are no records, initialise and store as 1'''
+    def getQ(self, state, action): # get Q states
+        if(self.Q_table.get((state, action))) is None:
+            self.Q_table[(state, action)] = 1.0
+        return self.Q_table.get((state, action))
+
+    '''Check if there are any spaces left on the board'''
     def check_board_complete(self, board):
         for row in board:
             for char in row:
@@ -146,10 +142,12 @@ class QLearner:
                     return False
         return True
 
+    '''Save all Q(S, A) calculated during training'''
     def saveQtable(self, file_name):  #save table
         with open(file_name, 'wb') as handle:
             pickle.dump(self.Q_table, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+    '''Load all Q(S, A) calculated during training'''
     def loadQtable(self, file_name): # load table
         with open(file_name, 'rb') as handle:
             self.Q_table = pickle.load(handle)
