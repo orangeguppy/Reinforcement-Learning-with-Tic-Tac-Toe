@@ -55,6 +55,7 @@ class QLearner:
         self.Q_table = {}
         self.Q_last = 0.0
         self.state_action_last = None
+        self.last_board = None
      
     '''
     Step 3: Greedy-Epsilon strategy to pick an action
@@ -95,7 +96,7 @@ class QLearner:
         else:
             i = Q_list.index(maxQ)
         self.state_action_last = (state, valid_actions[i])
-        self.q_last = self.getQ(state, valid_actions[i])
+        self.Q_last = self.getQ(state, valid_actions[i])
         return valid_actions[i]
 
     def getQ(self, state, action): # get Q states
@@ -104,18 +105,19 @@ class QLearner:
         return self.Q_table.get((state, action))
 
     '''Q(S, A) = Q(S, A) + alpha * (R + gamma * maxaQ(S', a) - Q(S, A))'''
-    def calculate_Q_new(self, s_old, s_new, action):
-        # Old reward
-        Q_old_reward = self.Q_table[(s_old, action)]
-        action_maximising_new_state = self.get_most_optimal_action(s_new, action[2])
+    def calculate_Q_new(self, s_new, char):
+        # Get the most optimal action for the new state
+        action_maximising_new_state = self.get_most_optimal_action(s_new, char)
 
         # Q(S', A)
         if (action_maximising_new_state is not None):
-            q_s_prime_a = self.Q_table[(s_new, action_maximising_new_state)]
+            q_s_prime_a = self.getQ(s_new, action_maximising_new_state)
+        else:
+            q_s_prime_a = 0
 
-            # Get reward of the new state
-            reward = self.calculate_reward(s_new, action[2]) # Pass in the current state of the board and the character being plotted
-            self.Q_table[(s_old, action)] = Q_old_reward + self.alpha * (reward + self.gamma * (q_s_prime_a) - Q_old_reward)
+        # Get reward of the new state
+        reward = self.calculate_reward(s_new, char) # Pass in the current state of the board and the character being plotted
+        self.Q_table[self.state_action_last] = self.getQ(self.state_action_last[0], self.state_action_last[1]) + self.alpha * (reward + self.gamma * (q_s_prime_a) - self.getQ(self.state_action_last[0], self.state_action_last[1]))
 
     def calculate_reward(self, s_new, char):
         if (utils.check_for_win_condition(s_new, char)):

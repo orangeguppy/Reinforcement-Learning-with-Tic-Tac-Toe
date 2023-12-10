@@ -2,6 +2,7 @@ import players
 from ui import UI
 from game_controller import Game_Controller
 from game_logic import Game_Logic
+import logging
 
 def random_players():
     playerX = players.RandomPlayer()
@@ -27,18 +28,13 @@ def train(num_epochs):
     playerX.saveQtable("playerXstates")
     playerO.saveQtable("playerOstates")
 
-    for key, value in playerX.Q_table.items():
-        if value > 1:
-            print(key)
-            print(value)
-
  # QLearner vs Human
 def play_against_ai():
     ui = UI()
     playerX = players.QLearner()
-    # playerX.loadQtable("playerXstates")
-    # logging.basicConfig(filename='output.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    # logging.info(playerX.Q_table)
+    playerX.loadQtable("playerXstates")
+    logging.basicConfig(filename='output.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.info(playerX.Q_table)
     playerO = players.HumanPlayer(ui)
     game_logic = Game_Logic(playerX, playerO)
     game_controller = Game_Controller(game_logic, ui)
