@@ -10,7 +10,7 @@ to immediately play against a pre-trained Q-Learning agent
 
 # Key lessons learnt
 1. Using lazy-loading for initialising the Q-table is very important. I tried to initialise all possible permutations of states and actions at first, but it greatly slowed training time.
-2. I initialised updated the Q-Table like this (pseudocode):
+2. I initially updated the Q-Table like this (pseudocode):
    
    a) Player's turn
 
